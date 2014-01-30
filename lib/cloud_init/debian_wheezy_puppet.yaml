@@ -1,0 +1,56 @@
+#cloud-config
+#
+# Our cloud-init bootstrapping configuration for Debian Wheezy AMIs. The
+# strategy here is to bring the instance up to a point where Puppet can take
+# over, not to include too much configuration.
+#
+
+# Don't disable root SSH access.
+#
+disable_root: false
+
+# Use our apt proxy when installing packages. Note that our oll::packages
+# puppet module also configures this proxy, but the duplication is necessary
+# for pre-puppet package installation.
+#
+apt_proxy: http://apt-cacher.aether.lettersandlight.org:3142
+
+# Upgrade all existing packages
+#
+package_upgrade: true
+packages:
+  - psmisc
+  - less
+  - puppet
+  - resolvconf
+  - vim
+  - curl
+
+# Configure our search domain and disable dhcpd management of DNS
+#
+bootcmd:
+  - [ cloud-init-per, once, dhcpdns, sed, -i.aether.bak, 's/^SET_DNS=/#SET_DNS/', /etc/default/dhcpcd ]
+  - [ cloud-init-per, once, dhcpdreload, /sbin/dhcpcd-bin, -n, eth0 ]
+
+write_files:
+  - path: /etc/resolvconf/resolv.conf.d/base
+    content: |
+      search aether.lettersandlight.org
+
+runcmd:
+  - [ resolvconf, -u ]
+
+# Adjust default mount options to work around Debian nobootwait bug
+# 
+#   http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=702382
+#
+mount_default_field: [ None, None, "auto", "defaults,nofail", "0", "2" ]
+
+# Configure Puppet to take over configuration
+#
+#   http://cloudinit.readthedocs.org/en/latest/topics/examples.html#setup-and-run-puppet
+#
+puppet:
+  conf:
+    agent:
+      server: "puppet"

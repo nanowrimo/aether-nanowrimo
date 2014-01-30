@@ -1,0 +1,9 @@
+default:
+  access_key: ~/.ec2/access.key
+  secret_key: ~/.ec2/secret.key
+  ssh_keys:
+    - ~/.ec2/dduvall.pem
+
+  key_name: dduvall
+  within_aws: false
+  namespace: Nano
