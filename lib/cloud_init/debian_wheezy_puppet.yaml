@@ -26,18 +26,22 @@ packages:
   - vim
   - curl
 
-# Configure our search domain and disable dhcpd management of DNS
+# Disable dhcpd management of DNS
 #
 bootcmd:
   - [ cloud-init-per, once, dhcpdns, sed, -i.aether.bak, 's/^SET_DNS=/#SET_DNS/', /etc/default/dhcpcd ]
   - [ cloud-init-per, once, dhcpdreload, /sbin/dhcpcd-bin, -n, eth0 ]
 
 write_files:
+  # Configure our search domain
+  #
   - path: /etc/resolvconf/resolv.conf.d/base
     content: |
       search aether.lettersandlight.org
 
 runcmd:
+  # Add our new search domain (see above)
+  #
   - [ resolvconf, -u ]
 
 # Adjust default mount options to work around Debian nobootwait bug
