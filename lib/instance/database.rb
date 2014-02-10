@@ -1,5 +1,5 @@
 class Nano::Database < Aether::Instance::Default
-  include InstanceHelpers::MetaDisk
+  include Aether::InstanceHelpers::MetaDisk
 
   self.type = "database"
   self.default_options = {
